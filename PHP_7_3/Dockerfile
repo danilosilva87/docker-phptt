@@ -105,7 +105,7 @@ RUN set -xe; \
     rm -rf /var/lib/apt/lists/*; \
     mkdir -p /usr/src; \
     cd /usr/src; \
-    wget -O php-src-PHP-7.2.zip https://github.com/php/php-src/archive/PHP-7.2.zip;
+    wget -O php-src-PHP-7.3.zip https://github.com/php/php-src/archive/PHP-7.3.zip;
 
 COPY docker-php-source /usr/local/bin/
 
@@ -180,7 +180,6 @@ RUN docker-php-source extract \
     --enable-mysqlnd \
     --with-libedit \
     --with-zlib \
-    --with-pcre-regex=/usr \
     --with-libdir="lib/$debMultiarch" \
     $PHP_EXTRA_CONFIGURE_ARGS \
     && make -j "$(nproc)" \
@@ -189,12 +188,9 @@ RUN docker-php-source extract \
     && cd / \
     && pecl update-channels \
     && rm -rf /tmp/pear ~/.pearrc \
-    && apt-get purge -y --auto-remove $fetchDeps
-
-RUN cd /usr/src/php/scripts/dev \
-    && rm generate-phpt.phar \
-    && php -d phar.readonly=0 generate-phpt/gtPackage.php \
-    && cd /
+    && apt-get purge -y --auto-remove $fetchDeps \
+    && docker-php-source delete \
+    && rm -rf /usr/src/php-src-PHP-7.3.zip
 
 RUN chown -R $USER_NAME.$USER_NAME /usr/src/
 
